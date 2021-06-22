@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import TodoForm from './TodoForm';
-import TodoDelete from './TodoDelete'
+import TodoDelete from './TodoDelete';
+import TodoEdit from './TodoEdit';
 
 function TodoList() {
 
@@ -20,10 +21,23 @@ function TodoList() {
         setCurrentView(View.TODO_ADD_FORM);
     };
 
+    const editClick = evt => {
+        const todo = todoItems.find(t => t.id === parseInt(evt.target.value, 10));
+        setCurrentTodo(todo);
+        setCurrentView(View.TODO_EDIT_FORM);
+    }
+
     const saveTodo = todo => {
-        if(todo.text !== ""){
-            todo.id = todoItems.length + 1;
-            setTodoItems([...todoItems, todo])
+
+        if(todo.id) { //edit
+            const newTodos = [...todoItems];
+            newTodos[todoItems.indexOf(currentTodo)] = todo;
+            setTodoItems(newTodos);
+        } else { //add
+            if(todo.text !== ""){
+                todo.id = todoItems.length + 1;
+                setTodoItems([...todoItems, todo]);
+            }
         }
         setCurrentView("todos");
     };
@@ -36,7 +50,6 @@ function TodoList() {
 
     const deleteTodo = (todoId) => {
         const todo = todoItems.find(t => t.id === todoId);
-        console.log(todo);
         todoItems.pop(todo);
         setCurrentView(View.TODOS);
     }
@@ -48,6 +61,10 @@ function TodoList() {
     } else if (currentView === View.TODO_DELETE_FORM) {
         return (
             <TodoDelete saveTodo={saveTodo} currentTodo={currentTodo} deleteTodo={deleteTodo}/>
+        );
+    } else if (currentView === View.TODO_EDIT_FORM) {
+        return (
+            <TodoEdit saveTodo={saveTodo} currentTodo={currentTodo}/>
         );
     }
     return (
@@ -62,7 +79,7 @@ function TodoList() {
             <div className="row">
                 <ul className="list-group">
                     {todoItems.map(i => <li key={i.id} className="list-group-item">{i.text}
-                    <button className="btn btn-secondary ms-2 me-2" value={i.id}>Edit
+                    <button className="btn btn-secondary ms-2 me-2" value={i.id} onClick={editClick}>Edit
                     </button><button className="btn btn-danger me-2" onClick={deleteClick}
                      value={i.id}>Delete</button></li>)}
                 </ul>
